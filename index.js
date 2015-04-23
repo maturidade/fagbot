@@ -106,5 +106,5 @@ var server = app.listen(process.env.PORT || 3000, () => {
   log("Server listening port", server.address().port);
 
   log("Time to wake up the engines")
-  // bot.start(name => log("Bot " + name + " up and running"));
+  bot.start(name => log("Bot " + name + " up and running"));
 });
