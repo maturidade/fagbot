@@ -10,17 +10,25 @@ var PHABRICATOR_S3_BUCKET = process.env.PHABRICATOR_S3_BUCKET;
 var AWS_KEY_ID = process.env.AWS_KEY_ID;
 var AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 
+var path = require("path");
+
 var express = require("express");
 var urljoin = require("url-join");
 var log = console.log;
 
-var MemeRepository = require("./meme/phabricator/repository");
-var MemeDownloader = require("./meme/phabricator/downloader");
+var LocalMemeRepository = require("./meme/local/repository");
+var PhabricatorMemeRepository = require("./meme/phabricator/repository");
+var PhabricatorMemeDownloader = require("./meme/phabricator/downloader");
+var FallbackMemeRepository = require("./meme/fallback_repository");
+
 var VoteRepository = require("./vote/repository");
 var Bot = require("./slack/bot");
 
-var memeDownloader = new MemeDownloader(PHABRICATOR_S3_BUCKET, AWS_KEY_ID, AWS_SECRET_ACCESS_KEY);
-var memeRepository = new MemeRepository(PHABRICATOR_DB_URL, memeDownloader);
+var localMemes = new LocalMemeRepository(path.resolve(__dirname, "memes"));
+var phabricatorMemeDownloader = new PhabricatorMemeDownloader(PHABRICATOR_S3_BUCKET, AWS_KEY_ID, AWS_SECRET_ACCESS_KEY);
+var phabricatorMemes = new PhabricatorMemeRepository(PHABRICATOR_DB_URL, phabricatorMemeDownloader);
+var memeRepository = new FallbackMemeRepository(localMemes, phabricatorMemes);
+
 var voteRepository = new VoteRepository();
 var bot = new Bot(BOT_TOKEN);
 
@@ -62,12 +70,10 @@ bot.when(/\b(D\d+)\b/, (message, diff) => {
 // Meme!!11!
 // ex: sashakiss
 bot.when(/^([^\s]+)$/, (message, meme) => {
-  memeRepository.findMeme(meme).then(() => {
+  memeRepository.findMeme((meme) => {
     log("Meme", meme, "in a jorney for the lulz");
     bot.postMeme(meme, message.channel);
-  }, () => {
-    log("Meme " + meme + " not found");
-  });
+  }, () => log("Meme " + meme + " not found"));
 });
 
 var app = express();
@@ -76,7 +82,8 @@ var app = express();
 app.get("/meme", (req, res) => {
   memeRepository.listMemes().then(memes => {
     res.writeHead(200, { "Content-Type": "text/plain" });
-    res.write(memes.join("\n")).end();
+    res.write(memes.join("\n"));
+    res.end();
   });
 });
 
@@ -99,5 +106,5 @@ var server = app.listen(process.env.PORT || 3000, () => {
   log("Server listening port", server.address().port);
 
   log("Time to wake up the engines")
-  bot.start(name => log("Bot " + name + " up and running"));
+  // bot.start(name => log("Bot " + name + " up and running"));
 });
