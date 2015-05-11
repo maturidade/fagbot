@@ -65,7 +65,7 @@ bot.when(/^\?(.+)$/, (message, subject) => {
 // Meme!!11!
 // ex: sashakiss
 bot.when(/^([^\s]+)$/, (message, meme) => {
-  memeRepository.findMeme((meme) => {
+  memeRepository.findMeme(meme).then(meme => {
     log("Meme", meme, "in a jorney for the lulz");
     bot.postMeme(meme, message.channel);
   }, () => log("Meme " + meme + " not found"));
