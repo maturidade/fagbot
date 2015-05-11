@@ -4,7 +4,6 @@ if (process.env.NODE_ENV != "production") require("dotenv").load({ silent: true 
 
 var APP_URL = process.env.APP_URL;
 var BOT_TOKEN = process.env.BOT_TOKEN;
-var PHABRICATOR_URL = process.env.PHABRICATOR_URL;
 var PHABRICATOR_DB_URL = process.env.PHABRICATOR_DB_URL;
 var PHABRICATOR_S3_BUCKET = process.env.PHABRICATOR_S3_BUCKET;
 var AWS_KEY_ID = process.env.AWS_KEY_ID;
@@ -61,13 +60,6 @@ bot.when(/^\?(.+)$/, (message, subject) => {
     log(subject, " not found");
     bot.postMessage("Ninguém votou na enquete \"" + subject + "\" ainda...", message.channel);
   });
-});
-
-// Diff URL
-// ex: Could someone review D2015?
-bot.when(/\b(D\d+)\b/, (message, diff) => {
-  log("Generating diff URL for", diff);
-  bot.postMessage(urljoin(PHABRICATOR_URL, diff), message.channel);
 });
 
 // Meme!!11!
