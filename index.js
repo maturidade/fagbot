@@ -84,11 +84,21 @@ app.get("/meme", (req, res) => {
 
 // Slack slash command /cowsay
 app.get("/cowsay", (req, res) => {
+  var options = req.query.text.match(/-f\s*(\w*)\s*(.*)/);
+  var toSay = {
+      text: req.query.text
+    };
+  if (options != null) {
+    toSay = {
+      f: options[1],
+      text: options[2]
+    };
+  } 
   request({
     uri: SLACK_WEBHOOK_URL,
     method: "POST",
     json: {
-      text: "```\n" + cowsay.say({ text: req.query.text }) + "\n```",
+      text: "```\n" + cowsay.say(toSay) + "\nby - " + req.query.user_name + "```",
       channel: "#" + req.query.channel_name,
       username: "cow",
       icon_emoji: ":cow:"
