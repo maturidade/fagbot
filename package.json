@@ -1,7 +1,7 @@
 {
-  "name": "Tagbot",
+  "name": "Fagbot",
   "version": "1.0.0",
-  "description": "Tagview personal slack bot",
+  "description": "WTF-Chat personal slack bot",
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/babel-node index.js",
