@@ -24,22 +24,6 @@ module.exports = class Conduit {
     });
   }
 
-  listDiffsByIds(ids) {
-    if (ids.length > 0) {
-      return this.call("differential.query", { phids: ids });
-    } else {
-      return Promise.resolve([]);
-    }
-  }
-
-  listUsersByIds(ids) {
-    if (ids.length > 0) {
-      return this.call("user.query", { phids: ids });
-    } else {
-      return Promise.resolve([]);
-    }
-  }
-
   listMacros() {
     return this.call("macro.query");
   }

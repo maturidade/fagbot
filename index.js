@@ -19,7 +19,6 @@ var log = console.log;
 
 var LocalMemeRepository = require("./meme/local/repository");
 var PhabricatorMemeRepository = require("./meme/phabricator/repository");
-var PhabricatorMemeDownloader = require("./meme/phabricator/downloader");
 var FallbackMemeRepository = require("./meme/fallback_repository");
 
 var MemeRepository = require("./meme/phabricator/repository");
@@ -28,7 +27,6 @@ var Bot = require("./slack/bot");
 var Conduit = require("./phabricator/conduit");
 
 var conduit = new Conduit(CONDUIT_USER, CONDUIT_CERTIFICATE, CONDUIT_API_URL);
-var phabricatorNotificator = new PhabricatorNotificator(conduit);
 var localMemes = new LocalMemeRepository(path.resolve(__dirname, "memes"));
 var phabricatorMemes = new MemeRepository(conduit);
 var memeRepository = new FallbackMemeRepository(localMemes, phabricatorMemes);
@@ -124,11 +122,6 @@ app.get(memePath, (req, res) => {
 bot.memeUrl = function(meme) {
   return urljoin(APP_URL, memePath).replace(":name", meme);
 }
-
-phabricatorNotificator.feed().subscribe(function(diffUpdate) {
-  console.log("Diff:", diffUpdate.diff.title);
-  bot.postDiff(diffUpdate);
-});
 
 var server = app.listen(process.env.PORT || 3000, () => {
   log("Server listening port", server.address().port);
